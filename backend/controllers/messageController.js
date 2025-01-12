@@ -7,32 +7,32 @@ export const sendMessage = async (req,res) => {
         const senderId = req.id;
         const receiverId = req.params.id;
         const {message} = req.body;
-        console.log("senderId",senderId)
-        console.log("message",message)
-        console.log("reciverId",reciverId)
+        // console.log(typeof(senderId))
+        // console.log("message",message)
+        // console.log("reciverId",receiverId)
         let gotConversation = await Conversation.findOne({
             participants:{$all : [senderId, receiverId]},
         });
-
-        console.log(gotConversation)
-
+        
         if(!gotConversation){
             gotConversation = await Conversation.create({
                 participants:[senderId, receiverId]
             })
         };
-
-        const newMessage = await Message.create({
-            senderId,
-            receiverId,
-            message
+        
+        // console.log(gotConversation)
+        let newMessage = await Message.create({
+            senderID:senderId,
+            reciverID:receiverId,
+            message:message
         });
+
+        // console.log(newMessage)
 
         if(newMessage){
             gotConversation.messages.push(newMessage._id);
         };
         
-
         await Promise.all([gotConversation.save(), newMessage.save()]);
          
         // SOCKET IO
@@ -47,6 +47,7 @@ export const sendMessage = async (req,res) => {
         console.log(error);
     }
 }
+
 export const getMessage = async (req,res) => {
     try {
         const receiverId = req.params.id;
